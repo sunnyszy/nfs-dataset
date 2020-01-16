@@ -38,17 +38,13 @@ nfsDirectory  = "/nfs"
 pc.defineParameter("clientCount", "Number of NFS clients",
                    portal.ParameterType.INTEGER, 2)
 
-# pc.defineParameter("osImage", "Select OS image",
-#                    portal.ParameterType.IMAGE,
-#                    imageList[0], imageList)
-pc.defineParameter("osImage", "URN of your OS image", 
+pc.defineParameter("osImage", "Select OS image",
                    portal.ParameterType.STRING,
-                   "urn:publicid:IDN+clemson.cloudlab.us+image+cops-PG0:webcachesim_simulation:1")
-
+                   "urn:publicid:IDN+clemson.cloudlab.us+image+cops-PG0:webcachesim_simulation:2")
 
 pc.defineParameter("DATASET", "URN of your dataset dataset", 
                    portal.ParameterType.STRING,
-                   "urn:publicid:IDN+clemson.cloudlab.us:cops-pg0+stdataset+webcachesim_short_term_256GB")
+                   "urn:publicid:IDN+clemson.cloudlab.us:cops-pg0+ltdataset+webcachesim_trace_long_term")
 
 # Always need this when using parameters
 params = pc.bindParameters()
@@ -66,6 +62,7 @@ nfsServer.disk_image = params.osImage
 nfsLan.addInterface(nfsServer.addInterface())
 # Initialization script for the server
 nfsServer.addService(pg.Execute(shell="sh", command="sudo /bin/bash /local/repository/nfs-server.sh"))
+nfsServer.addService(pg.Execute(shell="sh", command="sudo /bin/cp /local/repository/.bashrc /users/zhenyus/"))
 
 # Special node that represents the ISCSI device where the dataset resides
 dsnode = request.RemoteBlockstore("dsnode", nfsDirectory)
@@ -83,13 +80,12 @@ dslink.link_multiplexing = True
 # The NFS clients, also attached to the NFS lan.
 for i in range(1, params.clientCount+1):
     node = request.RawPC("node%d" % i)
+#     node.hardware_type = "xl170"
     node.disk_image = params.osImage
-#    node.hardware_type = "xl170"
     nfsLan.addInterface(node.addInterface())
     # Initialization script for the clients
     node.addService(pg.Execute(shell="sh", command="sudo /bin/bash /local/repository/nfs-client.sh"))
-    node.addService(pg.Execute(shell="sh", command="sudo /bin/cp /local/repository/.bashrc /users/dberger/"))
-    pass
+    node.addService(pg.Execute(shell="sh", command="sudo /bin/cp /local/repository/.bashrc /users/zhenyus/"))
 
 # Print the RSpec to the enclosing page.
 pc.printRequestRSpec(request)

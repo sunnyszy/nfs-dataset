@@ -5,6 +5,7 @@
 export PATH=$PATH:/proj/robinhood-PG0/workspace/webcachesim/build/bin
 export WEBCACHESIM_TRACE_DIR=/nfs
 export WEBCACHESIM_ROOT=/proj/robinhood-PG0/workspace/webcachesim
+export XDG_CONFIG_HOME=/proj/robinhood-PG0/workspace/XDG_CONFIG
 
 # If not running interactively, don't do anything
 case $- in

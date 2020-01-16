@@ -5,6 +5,7 @@
 export PATH=$PATH:/proj/cops-PG0/workspaces/zhenyus/webcachesim/build/bin
 export WEBCACHESIM_TRACE_DIR=/nfs
 export WEBCACHESIM_ROOT=/proj/cops-PG0/workspaces/zhenyus/webcachesim
+export XDG_CONFIG_HOME=/proj/cops-PG0/workspaces/zhenyus/XDG_CONFIG
 
 # If not running interactively, don't do anything
 case $- in

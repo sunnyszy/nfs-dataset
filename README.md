@@ -7,7 +7,7 @@ The below instructions setup remote environment in Cloudlab. The goal is to run 
 * Update the profile in Cloudlab (select the profile, click "edit", click "update" for Repository). Instantiate experiment from https://github.com/sunnyszy/nfs-dataset/tree/daniel. Please use the default OS image (urn:publicid:IDN+clemson.cloudlab.us+image+cops-PG0:webcachesim_simulation:2). Please create 20 nfs client nodes in Clement. Please use the long term dataset url you just creted.
 * Check and make sure `~/.bashrc` contains environment variables needed (PATH,WEBCACHESIM_TRACE_DIR,WEBCACHESIM_ROOT,XDG_CONFIG_HOME)
 * Check and make sure /nfs is mounted on client nfs nodes
-* We can going to run master python program on nfs server. Add ssh-key of nfs server to nfs client nodes by key.
+* We can going to run master python program on nfs server. Add ssh key of nfs server to nfs client nodes.
 * Prevent strict host key checking which can block parallel. Append to `~/.ssh/config`:
 ```bash
 Host *

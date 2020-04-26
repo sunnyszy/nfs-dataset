@@ -9,10 +9,10 @@ Click on any node in the topology and choose the `shell` menu item. Your shared 
 
 # Import the Portal object.
 import geni.portal as portal
-# Import the ProtoGENI library.
-import geni.rspec.pg as pg
 # Import the Emulab specific extensions.
 import geni.rspec.emulab as emulab
+# Import the ProtoGENI library.
+import geni.rspec.pg as pg
 
 # Create a portal context.
 pc = portal.Context()
@@ -20,53 +20,56 @@ pc = portal.Context()
 # Create a Request object to start building the RSpec.
 request = pc.makeRequestRSpec()
 
-# # Only Ubuntu images supported.
-# imageList = [
-#     ('urn:publicid:IDN+clemson.cloudlab.us+image+cops-PG0:webcachesim_simulation:1', 'WEBCACHESIM_SNAPSHOT'),
-#     ('urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU18-64-STD', 'UBUNTU 18.04'),
-#     ('urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU16-64-STD', 'UBUNTU 16.04'),
-#     ('urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU14-64-STD', 'UBUNTU 14.04'),
-#     ('urn:publicid:IDN+emulab.net+image+emulab-ops//CENTOS7-64-STD', 'CENTOS 7'),
-# ]
-
 # Do not change these unless you change the setup scripts too.
 nfsServerName = "nfs"
-nfsLanName    = "nfsLan"
-nfsDirectory  = "/nfs"
+nfsLanName = "nfsLan"
+nfsDirectory = "/nfs"
 
 # Number of NFS clients (there is always a server)
-pc.defineParameter("clientCount", "Number of NFS clients",
-                   portal.ParameterType.INTEGER, 2)
+pc.defineParameter(
+    "client_count", "Number of NFS clients", portal.ParameterType.INTEGER, 2
+)
 
-pc.defineParameter("osImage", "Select OS image",
-                   portal.ParameterType.STRING,
-                   "urn:publicid:IDN+clemson.cloudlab.us+image+cops-PG0:webcachesim_simulation:2")
+pc.defineParameter(
+    "os_image", "Select OS image", portal.ParameterType.STRING,
+    "urn:publicid:IDN+clemson.cloudlab.us+image+cops-PG0:webcachesim_simulation:2"
+)
 
-pc.defineParameter("DATASET", "URN of your dataset dataset", 
-                   portal.ParameterType.STRING,
-                   "urn:publicid:IDN+clemson.cloudlab.us:cops-pg0+ltdataset+webcachesim_trace_long_term")
+pc.defineParameter(
+    "dataset", "URN of your dataset dataset", portal.ParameterType.STRING,
+    "urn:publicid:IDN+clemson.cloudlab.us:cops-pg0+ltdataset+webcachesim_trace"
+)
+
+pc.defineParameter(
+    "username", "Username", portal.ParameterType.STRING,
+    "zhenyus"
+)
 
 # Always need this when using parameters
 params = pc.bindParameters()
 
 # The NFS network. All these options are required.
 nfsLan = request.LAN(nfsLanName)
-nfsLan.best_effort       = True
-nfsLan.vlan_tagging      = True
+nfsLan.best_effort = True
+nfsLan.vlan_tagging = True
 nfsLan.link_multiplexing = True
 
 # The NFS server.
 nfsServer = request.RawPC(nfsServerName)
-nfsServer.disk_image = params.osImage
+nfsServer.disk_image = params.os_image
 # Attach server to lan.
 nfsLan.addInterface(nfsServer.addInterface())
 # Initialization script for the server
-nfsServer.addService(pg.Execute(shell="sh", command="sudo /bin/cp /local/repository/.bashrc /users/zhenyus/"))
+# nfsServer.addService(pg.Execute(shell="sh", command="sudo /bin/cp /local/repository/.bashrc /users/zhenyus/"))
 nfsServer.addService(pg.Execute(shell="sh", command="sudo /bin/bash /local/repository/nfs-server.sh"))
+nfsServer.addService(pg.Execute(
+    shell="sh",
+    command="sudo /bin/bash /local/repository/init_home.sh %s" % params.username
+))
 
 # Special node that represents the ISCSI device where the dataset resides
 dsnode = request.RemoteBlockstore("dsnode", nfsDirectory)
-dsnode.dataset = params.DATASET
+dsnode.dataset = params.dataset
 
 # Link between the nfsServer and the ISCSI device that holds the dataset
 dslink = request.Link("dslink")
@@ -78,14 +81,18 @@ dslink.vlan_tagging = True
 dslink.link_multiplexing = True
 
 # The NFS clients, also attached to the NFS lan.
-for i in range(1, params.clientCount+1):
-    node = request.RawPC("node%d" % i)
-#     node.hardware_type = "xl170"
-    node.disk_image = params.osImage
+for i in range(params.client_count):
+    node = request.RawPC("node%02d" % (i+1))
+    #     node.hardware_type = "xl170"
+    node.disk_image = params.os_image
     nfsLan.addInterface(node.addInterface())
     # Initialization script for the clients
-    node.addService(pg.Execute(shell="sh", command="sudo /bin/cp /local/repository/.bashrc /users/zhenyus/"))
+    # node.addService(pg.Execute(shell="sh", command="sudo /bin/cp /local/repository/.bashrc /users/zhenyus/"))
     node.addService(pg.Execute(shell="sh", command="sudo /bin/bash /local/repository/nfs-client.sh"))
+    node.addService(pg.Execute(
+        shell="sh",
+        command="sudo /bin/bash /local/repository/init_home.sh %s" % params.username
+    ))
 
 # Print the RSpec to the enclosing page.
 pc.printRequestRSpec(request)

@@ -36,11 +36,11 @@ nfsDirectory  = "/nfs"
 
 # Number of NFS clients (there is always a server)
 pc.defineParameter("clientCount", "Number of NFS clients",
-                   portal.ParameterType.INTEGER, 2)
+                   portal.ParameterType.INTEGER, 1)
 
 pc.defineParameter("osImage", "Select OS image",
                    portal.ParameterType.STRING,
-                   "urn:publicid:IDN+clemson.cloudlab.us+image+cops-PG0:webcachesim_simulation:2")
+                   "urn:publicid:IDN+clemson.cloudlab.us+image+cops-PG0:webcachesim_simulation:4")
 
 pc.defineParameter("DATASET", "URN of your dataset dataset", 
                    portal.ParameterType.STRING,

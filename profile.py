@@ -37,6 +37,12 @@ pc.defineParameter("DATASET", "URN of your dataset dataset",
                    portal.ParameterType.STRING,
                    "urn:publicid:IDN+clemson.cloudlab.us:cops-pg0+ltdataset+webcachesim_trace")
 
+# Optional physical type for all nodes.
+pc.defineParameter("phystype",  "Optional physical node type",
+                   portal.ParameterType.STRING, "c6320",
+                   longDescription="Specify a physical node type (pc3000,d710,etc) " +
+                   "instead of letting the resource mapper choose for you.")
+
 # Always need this when using parameters
 params = pc.bindParameters()
 
@@ -71,6 +77,8 @@ dslink.link_multiplexing = True
 # The NFS clients, also attached to the NFS lan.
 for i in range(1, params.clientCount+1):
     node = request.RawPC("node%d" % i)
+    if params.phystype != "":
+        node.hardware_type = params.phystype
 #     node.hardware_type = "xl170"
     node.disk_image = params.osImage
     nfsLan.addInterface(node.addInterface())
